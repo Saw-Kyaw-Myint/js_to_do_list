@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Document</title>
+</head>
+<style>
+    .isShow {
+        display: none;
+    }
+
+    .display-none {
+        display: none;
+    }
+
+    .display-show {
+        display: block !important;
+    }
+
+    .strick {
+        text-decoration: line-through;
+    }
+
+    .lists-group {
+        display: flex;
+        padding: 10px;
+        background: #77c1dd;
+        width: 200px;
+        margin: 20px 0 10px 69px;
+
+    }
+
+    .lists-group button {
+        height: 23px;
+        margin: 14px 10px;
+    }
+
+</style>
+
+<body>
+    <p>items : <span id="totalItem"></span></p>
+    <div class="form-group">
+        <div class="form-group">
+    <button onclick="allCheck()" id="allCheck">all select</button>
+</div>
+    <button onclick="allCancel()" id="allCancel" class="display-none">cancel select</button>
+    <input type="text" id="message">
+    <button onclick="clearall()">allclear</button>
+</div>
+    <div id="menuList">
+
+    </div>
+
+    <script>
+        let message = document.getElementById('message'); // input
+        let menlist = document.getElementById('menuList'); // list
+        let totalNo = document.getElementById('totalItem');
+
+        let countid = 0; // for randomid
+        let lists = [];// list
+
+
+        message.addEventListener("keyup", function (e) {
+            if (e.keyCode == 13) {
+                
+                if((message.value).trim()){
+                    add();
+                }else{
+                    alert('Please write text');
+                }
+            }
+        });
+
+        const addListToBody = (list) => {
+            menlist.innerHTML = '';
+            list.map((item, index) => {
+                menlist.innerHTML += `
+            <div class="lists-group">
+            <p  onclick="check(${item.id})" class="${item.isConfirm == true ? 'isShow' : ' '}"><i class="fa-regular fa-square"></i></i></p>
+            <p class="${item.isConfirm == false ? 'isShow' : ' '}"  id="selectCheck${item.id}" onclick="selectCheck(${item.id})"><i class="fa-regular fa-square-check"></i></p>
+            <p class="${item.isEdit == true ? 'isShow' : ' '} ${item.isConfirm == true ? 'strick' : ' '}" id='input'  ondblclick="edit(${item.id})" >${item.title}</p>
+           <input type="input" id="updateText-${item.id}" class="${item.isEdit == false ? 'isShow' : ' '}" value="${item.title}" onblur="update(${item.id})">
+           <button onclick="deletetext(${item.id})" class="${item.isEdit == true ? 'isShow' : ' '}">delete</button>
+           </div>
+        `;
+            })
+
+        }
+
+        let storageList = JSON.parse(localStorage.getItem("todoList"));
+        if (storageList == null) {
+            lists = []
+        } else {
+            lists = storageList;
+        }
+        totalCount(lists);
+        addListToBody(lists);
+
+        //all checkout
+        function allCheck() {
+            let allCheck = document.getElementById('allCheck');
+            let allCancel = document.getElementById('allCancel');
+            const updateArray = lists.map(function (el) {
+                if (!el.isConfirm) {
+                    el.isConfirm = true;
+                }
+                return el;
+            });
+            totalCount(updateArray);
+            lists = updateArray;
+            addListToBody(lists);
+            allCheck.style.display = "none";
+            allCancel.style.display = "block";
+        }
+
+        //all cancel
+        function allCancel() {
+            let allCheck = document.getElementById('allCheck');
+            let allCancel = document.getElementById('allCancel');
+            const updateArray = lists.map(function (el) {
+                if (el.isConfirm) {
+                    el.isConfirm = false;
+                }
+                return el;
+            });
+            totalCount(updateArray);
+            lists = updateArray;
+            addListToBody(lists);
+            allCancel.style.display = "none";
+            allCheck.style.display = "block";
+        }
+
+        function totalCount(countArray) {
+            let lengthArray = countArray.filter(el => el.isConfirm != true);
+            totalNo.innerHTML = lengthArray.length;
+        }
+        //checkbox
+        function check(index) {
+            console.log(selectCheck);
+            const updateArray = lists.map(function (el) {
+                if (el.id === index) {
+                    if (!el.isConfirm) {
+                        console.log(el.title);
+                        el.isConfirm = true;
+                    } else {
+                        console.log(el.title);
+                        el.isConfirm = false;
+                    }
+                    return el;
+
+                }
+                return el;
+            });
+            totalCount(updateArray);
+            console.log(updateArray);
+            lists = updateArray;
+            addListToBody(updateArray);
+        }
+        //select check
+        function selectCheck(index) {
+            const selectArray = lists.map(function (el) {
+                if (el.id === index) {
+                    if (el.isConfirm) {
+                        console.log(el.title);
+                        el.isConfirm = false;
+                    } 
+                    return el;
+
+                }
+                return el;
+            });
+            totalCount(selectArray);
+            console.log(selectArray);
+            lists = selectArray;
+            addListToBody(lists);
+        }
+        //update
+        function update(index) {
+            var updateText = document.getElementById(`updateText-${index}`).value;
+            console.log(updateText, lists, index);
+            updateLists = JSON.parse(localStorage.getItem('todoList'));
+            const updateArray = updateLists.map(function (el) {
+                console.log(el)
+                if (el.id === index) {
+                    console.log(el.title);
+                    el.title = updateText.trim();
+                    el.isEdit = false;
+                }
+                return el;
+            });
+            localStorage.setItem("todoList", JSON.stringify(updateArray));//localstorage add
+            totalNo.innerHTML = lists.length;
+            addListToBody(updateArray);
+        }
+        // add 
+        function add() {
+            lists.push(
+                {
+                    id: new Date().getMilliseconds(),
+                    title: (message.value).trim(),
+                    isEdit: false,
+                    isConfirm: false,
+                });
+            localStorage.setItem("todoList", JSON.stringify(lists));//localstorage add
+            lists = JSON.parse(localStorage.getItem("todoList")); // Get localStorage objec
+            addListToBody(lists);
+            countid++;
+            totalCount(lists);
+            message.value = '';
+        }
+
+        let input = document.getElementById('input');
+
+        function edit(index) {
+            const editedArray = lists.map(function (el) {
+                if (el.id === index) {
+                    if (!el.isEdit) {
+                        el.isEdit = true;
+                    }
+                }
+                return el;
+            });
+            lists = editedArray;
+            addListToBody(lists);
+            let updateText = document.getElementById(`updateText-${index}`);
+            updateText.focus();
+            updateText.addEventListener("keyup", function (e) {
+                if (e.keyCode == 13) {
+                    update(index);
+                } else
+                    if (e.keyCode == 27) {
+                        var escText = document.getElementById(`updateText-${index}`).value;
+                        const escArray = lists.map(function (el) {
+                            console.log(el)
+                            if (el.id === index) {
+                                console.log(el.title);
+                                el.isEdit = false;
+                            }
+                            return el;
+                        });
+                        console.log(escArray)
+                        totalNo.innerHTML = lists.length;
+                        addListToBody(escArray);
+                    }
+            });
+
+        }
+
+        function deletetext(id) {
+            deleteLists = JSON.parse(localStorage.getItem('todoList'));
+            console.log(deleteLists);
+            deleteLists = deleteLists.filter(el => el.id !== id);
+            console.log(deleteLists);
+            localStorage.setItem("todoList", JSON.stringify(deleteLists));//localstorage add
+            lists = JSON.parse(localStorage.getItem('todoList'));
+            totalNo.innerHTML = deleteLists.length;
+            console.log(lists);
+            countid--;
+            addListToBody(lists);
+        }
+
+        function clearall() {
+            clearstorage = localStorage.clear();
+            lists = [];
+            totalNo.innerHTML = lists.length;
+            addListToBody(lists);
+        }
+    </script>
+</body>
+
+</html>
